@@ -80,11 +80,11 @@ const App = () => {
 
         if (d) {
             let a = {
-                "id": 2884043,
+                "id": 1,
                 "first_name": "Albert",
                 "last_name": "Usmanov",
                 "sex": 2,
-                "photo_200": "..."
+                "photo_200": "https://sun1-86.userapi.com/s/v1/ig2/0mApXKbszoZQ_5V-YXS7rD54TDPTxn8xu9XbmzfkWCxn3yxb54W8ErTcyXqqApWMBPEqA0ZLVjcfF_J3hTpOT-5X.jpg?size=50x50&quality=95&crop=584,681,359,359&ava=1"
             }
 
             setUser({id: 0})

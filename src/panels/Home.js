@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 
-import {Button, Cell, Div, Group, Header, Panel, PanelHeader, PanelHeaderBack, Switch} from '@vkontakte/vkui';
+import {Avatar, Button, Cell, Div, Group, Header, Panel, PanelHeader, PanelHeaderBack, Switch} from '@vkontakte/vkui';
 import bridge from "@vkontakte/vk-bridge";
 import {doc, getDoc, setDoc} from "firebase/firestore/lite";
 import {Icon28UserOutline} from "@vkontakte/icons";
@@ -22,6 +22,7 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
             connectTimer = setInterval(() => {
                 getDoc(docRef).then(snap => {
                     if (snap.exists()) {
+                        console.log("snap.data().stateString: " + snap.data().stateString)
                         setStateString(() => snap.data().stateString)
                     }
                 })
@@ -31,20 +32,27 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
             if (connectTimer !== null) {
                 clearInterval(connectTimer)
             }
+            if (status === "host" && fetchedUser !== null) {
+                setDoc(doc(db, 'hs', fetchedUser.id.toString()), {
+                    stateString: stateString.slice(0, 8) + "P",
+                })
+            }
+            bridge.send("VKWebAppFlashSetLevel", {"level": 0});
         }
     }, [])
 
     useEffect(() => {
-        if (status === "host") {
+        console.log("useEffect stateString:" + stateString)
+        if (status === "host" && fetchedUser !== null) {
             setDoc(doc(db, 'hs', fetchedUser.id.toString()), {
                 stateString: stateString,
             })
         }
 
+        clearInterval(myInterval)
         if (stateString[stateString.length - 1] === "R") {
             run()
         } else {
-            clearInterval(myInterval)
             setCurrentSecond(0)
             bridge.send("VKWebAppFlashSetLevel", {"level": 0});
         }
@@ -75,7 +83,7 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
             setCurrentSecond((prev) => 1 + (prev) % 8)
             sec = (sec + 1) % 8
             bridge.send("VKWebAppFlashSetLevel", {"level": parseInt(stateString[sec])});
-        }, 300);
+        }, 1000);
         setMyInterval(timerId)
     }
 
@@ -90,8 +98,11 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
                             onClick={startPressed}>Начать</Button>
                     <Button size="l" stretched mode="secondary" onClick={stopPressed}>Остановить</Button>
                 </Div>
-            </Group> :
-            <Cell before={<Icon28UserOutline/>}>{host !== null? host.first_name + " " + host.last_name : "..."}</Cell>}
+            </Group> : <Group>
+                <Header mode="secondary">Наш диджей</Header>
+              <Cell before={<Avatar src={host !== null? host.photo_200 : ""}/>}>{host !== null? host.first_name + " " + host.last_name : "..."}</Cell>
+            </Group>
+        }
         <Group>
             <Header mode="secondary">Управление секундами</Header>
             <Div style={{display: "flex", justifyContent: "space-between", overflow: "auto"}}>
@@ -103,9 +114,9 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
                     }}>
                         <Div style={{padding: "0"}}>{index + 1} сек</Div>
                         {status === "host" ?
-                            <Switch value={symb === "1"}
+                            <Switch checked={symb === "1"}
                                     onChange={(e) => switchChange(index, e.target.value)}/> :
-                            <Switch value={symb === "1"} disabled
+                            <Switch checked={symb === "1"} disabled
                                     onChange={(e) => switchChange(index, e.target.value)}/>}
                     </Div>
                 })
