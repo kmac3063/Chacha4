@@ -27,8 +27,21 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
                     }
                 })
             }, 100)
+        } else if (fetchedUser !== null) {
+            const docRef = doc(db, 'hs', fetchedUser.id.toString())
+            getDoc(docRef).then(snap => {
+                if (snap.exists()) {
+                    console.log("snap.data().stateString: " + snap.data().stateString)
+                    setStateString(() => snap.data().stateString)
+                }
+            })
         }
         return () => {
+            if (myInterval !== null)
+                setMyInterval((prev) => {
+                    clearInterval(prev)
+                    return prev
+                })
             if (connectTimer !== null) {
                 clearInterval(connectTimer)
             }
@@ -37,9 +50,6 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
                     stateString: stateString.slice(0, 8) + "P",
                 })
             }
-            setStateString((prev) => prev.slice(0, 8) + "P")
-            clearInterval(myInterval)
-            bridge.send("VKWebAppFlashSetLevel", {"level": 0});
         }
     }, [])
 
@@ -51,7 +61,6 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
             })
         }
 
-        clearInterval(myInterval)
         if (stateString[stateString.length - 1] === "R") {
             run()
         } else {
@@ -74,6 +83,12 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
     }
 
     const stopPressed = () => {
+        setMyInterval((prev) => {
+            if (prev !== null) {
+                clearInterval(prev)
+            }
+            return null
+        })
         setStateString((prev) => prev.slice(0, 8) + "P")
     }
 
@@ -82,6 +97,7 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
         setCurrentSecond(1)
         bridge.send("VKWebAppFlashSetLevel", {"level": parseInt(stateString[0])});
         let timerId = setInterval(() => {
+            console.log(1)
             setCurrentSecond((prev) => 1 + (prev) % 8)
             sec = (sec + 1) % 8
             bridge.send("VKWebAppFlashSetLevel", {"level": parseInt(stateString[sec])});

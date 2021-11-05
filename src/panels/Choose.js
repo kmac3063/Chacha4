@@ -17,10 +17,6 @@ import {
 import bridge from "@vkontakte/vk-bridge";
 
 const Choose = ({id, go, fetchedUser, scheme, connect, host}) => {
-    useEffect(() => {
-        console.log("Choose")
-        bridge.send("VKWebAppFlashSetLevel", {"level": 0});
-    }, [])
     return <Panel id={id}>
         <PanelHeader>Один-ноль фонарик</PanelHeader>
         <Group>
