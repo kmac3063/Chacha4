@@ -6,7 +6,7 @@ import {doc, getDoc, setDoc} from "firebase/firestore/lite";
 import {Icon28UserOutline} from "@vkontakte/icons";
 
 
-const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
+const Home = ({id, setActivePanel, fetchedUser, scheme, host, status, db}) => {
     const [currentSecond, setCurrentSecond] = useState(0)
     const [myInterval, setMyInterval] = useState(null)
     const [stateString, setStateString] = useState("00000000P")
@@ -27,21 +27,9 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
                     }
                 })
             }, 100)
-        } else if (fetchedUser !== null) {
-            const docRef = doc(db, 'hs', fetchedUser.id.toString())
-            getDoc(docRef).then(snap => {
-                if (snap.exists()) {
-                    console.log("snap.data().stateString: " + snap.data().stateString)
-                    setStateString(() => snap.data().stateString)
-                }
-            })
         }
+
         return () => {
-            if (myInterval !== null)
-                setMyInterval((prev) => {
-                    clearInterval(prev)
-                    return prev
-                })
             if (connectTimer !== null) {
                 clearInterval(connectTimer)
             }
@@ -54,13 +42,13 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
     }, [])
 
     useEffect(() => {
-        console.log("useEffect stateString:" + stateString)
         if (status === "host" && fetchedUser !== null) {
             setDoc(doc(db, 'hs', fetchedUser.id.toString()), {
                 stateString: stateString,
             })
         }
 
+        clearInterval(myInterval)
         if (stateString[stateString.length - 1] === "R") {
             run()
         } else {
@@ -83,12 +71,6 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
     }
 
     const stopPressed = () => {
-        setMyInterval((prev) => {
-            if (prev !== null) {
-                clearInterval(prev)
-            }
-            return null
-        })
         setStateString((prev) => prev.slice(0, 8) + "P")
     }
 
@@ -107,7 +89,11 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
 
     return <Panel id={id}>
         <PanelHeader
-            left={<PanelHeaderBack onClick={go} data-to={'Choose'}/>}
+            left={<PanelHeaderBack onClick={() => {
+                clearInterval(myInterval)
+                setActivePanel('Choose')
+            }
+            } data-to={'Choose'}/>}
         >{status === "host" ? "Диджей" : "Слушатель"}</PanelHeader>
         {status === "host" ?
             <Group>

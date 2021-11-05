@@ -110,7 +110,7 @@ const App = () => {
                 <View activePanel={activePanel} popout={popout}>
                     <WelcomeScreen id='WelcomeScreen' fetchedUser={fetchedUser} go={go}/>
                     <Choose id='Choose' fetchedUser={fetchedUser} go={go} connect={connect} host={host}/>
-                    <Home id='Home' fetchedUser={fetchedUser} go={go}
+                    <Home id='Home' fetchedUser={fetchedUser} setActivePanel={setActivePanel}
                           host={friend} status={status} db={db}
                     />
                 </View>
