@@ -37,6 +37,8 @@ const Home = ({id, go, fetchedUser, scheme, host, status, db}) => {
                     stateString: stateString.slice(0, 8) + "P",
                 })
             }
+            setStateString((prev) => prev.slice(0, 8) + "P")
+            clearInterval(myInterval)
             bridge.send("VKWebAppFlashSetLevel", {"level": 0});
         }
     }, [])
