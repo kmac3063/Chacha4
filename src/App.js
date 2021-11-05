@@ -21,7 +21,7 @@ const App = () => {
     // const schemeAttribute = document.createAttribute('scheme');
     // schemeAttribute.value = 'dark';
     // document.body.attributes.setNamedItem(schemeAttribute);
-    const d = true
+    const d = false
 
     const firebaseConfig = {
         apiKey: "AIzaSyA4pTIWp427xU-6UKZhMS5gm7jgZpnjTaM",
